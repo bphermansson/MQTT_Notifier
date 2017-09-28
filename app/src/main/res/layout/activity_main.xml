@@ -6,31 +6,110 @@
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
     android:id="@+id/root">
 
-    <TextView android:text="@string/company" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/company"
-        android:layout_centerHorizontal="true"/>
-
-    <TextView android:text="@string/ideator" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ideator"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/company"/>
-
-    <TextView android:text="@string/developer" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/developer"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/ideator"/>
-
-    <ImageView
-        android:id="@+id/door_image"
+    <TextView
+        android:id="@+id/status"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:scaleType="fitXY"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/ideator"
-        android:src="@drawable/closed_door"
-        android:adjustViewBounds="true"/>
+        android:layout_height="25dp"
+        android:text="Welcome to MQTTNotifier!" />
+
+    <Button
+        android:id="@+id/btnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/messages"
+        android:onClick="btnClick"
+        android:text="Clear" />
+
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/btnClear"
+        android:layout_margin="10dp"
+        android:background="@android:color/darker_gray"
+        android:padding="10dp" />
+
+    <TextView
+        android:id="@+id/messages"
+        android:layout_width="fill_parent"
+        android:layout_height="220dp"
+        android:layout_below="@+id/status"
+        android:lines="4"
+        android:maxLines="4" />
+
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:id="@+id/mqttip"
+        android:layout_below="@+id/line"
+        android:hint="Mqtt Ip"
+        android:onClick="etClick"
+
+        />
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:id="@+id/mqttport"
+        android:layout_below="@+id/line"
+        android:layout_toRightOf="@id/mqttip"
+        android:layout_toEndOf="@id/mqttip"
+        android:hint="Mqtt port"
+        />
+
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:id="@+id/mqttuser"
+        android:layout_below="@+id/mqttip"
+        android:hint="Username"
+
+        />
+
+    <EditText
+        android:id="@+id/mqttpass"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/mqttip"
+        android:layout_toEndOf="@id/mqttuser"
+        android:layout_toRightOf="@id/mqttuser"
+        android:hint="Password"
+        android:inputType="textPassword" />
+    <EditText
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:id="@+id/mqtt_topic"
+        android:layout_below="@+id/mqttuser"
+        android:hint="Topic"
+        />
+
+    <CheckBox
+        android:id="@+id/chkSound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/mqtt_topic"
+        android:layout_toRightOf="@+id/mqtt_topic"
+        android:layout_below="@id/mqttpass"
+        android:onClick="chkSoundClicked"
+        android:text="Silent" />
+
+    <Button
+        android:id="@+id/btnConnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mqtt_topic"
+        android:onClick="btnClick"
+        android:clickable="true"
+        android:text="Save/Connect" />
+
+    <CheckBox
+        android:id="@+id/chkAuto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/btnConnect"
+        android:layout_toRightOf="@+id/btnConnect"
+        android:layout_below="@id/mqtt_topic"
+        android:onClick="chkAutoClicked"
+        android:text="Auto connect" />
 </RelativeLayout>
