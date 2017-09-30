@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import static java.security.AccessController.getContext;
+
 public class MainActivity extends AppCompatActivity implements MqttCallback {
 
     private static final String TAG = "MainActivity";
@@ -224,8 +226,26 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         mBuilder.setContentText(text);
 
         CheckBox chkSound = (CheckBox) findViewById(R.id.chkSound);
-        if (chkSound.getText()=="false") {
-            Log.d(TAG, "Sound on");
+
+        //boolean checked = ((CheckBox) view).isChecked();
+        boolean chkd = chkSound.isChecked();
+        //switch(view.getId()) {
+          //  case R.id.chkSound:
+                if (chkd) {
+                    // Put some meat on the sandwich
+                } else
+                {
+                // Remove the meat
+                    System.out.println("Sound on");
+                    Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    mBuilder.setSound(alarmSound);
+                }
+            //        break;
+        //}
+/*
+        System.out.println(chkSound.isEnabled());
+
+        if (chkSound.getText().toString()=="Silent")  {
             System.out.println("Sound on");
             Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             mBuilder.setSound(alarmSound);
@@ -233,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         else {
             System.out.println("Sound off");
         }
+        */
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // notificationID allows you to update the notification later on.
         Integer notificationID = 1;
@@ -262,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
 
         Toast.makeText(MainActivity.this, "Topic: " + topic + "\nMessage: " + message, Toast.LENGTH_LONG).show();
         status.setText("Got a new message");
+
         sendnotification(topic, message.toString());
     }
 
