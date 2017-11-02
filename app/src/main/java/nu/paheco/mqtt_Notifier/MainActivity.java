@@ -6,12 +6,20 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +37,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static java.security.AccessController.getContext;
 
@@ -48,7 +58,10 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         TextView port = (TextView) findViewById(R.id.mqttport);
         TextView user = (TextView) findViewById(R.id.mqttuser);
         TextView pass = (TextView) findViewById(R.id.mqttpass);
-        TextView topic = (TextView) findViewById(R.id.mqtt_topic);
+        //final TextInputLayout pass = (TextInputLayout) findViewById(R.id.mqttpass);
+        //TextView topic = (TextView) findViewById(R.id.mqtt_topic);
+        TextView messages = (TextView) findViewById(R.id.messages);
+        messages.setMovementMethod(new ScrollingMovementMethod());  // Activate scroll
 
         // Get stored preferences
         sharedpreferences = getSharedPreferences("mypref",
@@ -105,6 +118,38 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 chkSound.setChecked(true);
             }
         }
+
+        // Clear topicSet
+        //sharedpreferences.edit().remove("topicSet").commit();
+
+
+        // Print all stored preferences
+        Map<String, ?> allEntries = sharedpreferences.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            System.out.println("map values: " + entry.getKey() + ": " + entry.getValue().toString());
+        }
+
+        // List with previous topics, autocomplete
+
+        Set<String> outSet = sharedpreferences.getStringSet("topicSet", new HashSet<String>());
+        Set<String> workingSet = new HashSet<String>(outSet);
+        String oldtopics[] = workingSet.toArray(new String[workingSet.size()]);
+/*
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                        android.R.layout.simple_dropdown_item_1line, oldtopics);
+        if (oldtopics.length!=0) {
+            System.out.println("OT: " + oldtopics[0]);
+            System.out.println("OT: " + oldtopics[1]);
+
+        }
+*/
+        AutoCompleteTextView topicView;
+        ArrayAdapter<String> adapterTopic;
+        topicView = (AutoCompleteTextView) findViewById(R.id.mqtt_topic);
+        adapterTopic = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_list_item_1, oldtopics);
+        topicView.setAdapter(adapterTopic);
+
         /*
         else {
             mqttpass="";
@@ -114,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         port.setText(mqttport);
         user.setText(mqttuser);
         pass.setText(mqttpass);
-        topic.setText(mqtttopic);
+        topicView.setText(mqtttopic);
 
         CheckBox ac = (CheckBox) findViewById(R.id.chkAuto);
         if (ac.isChecked()){
@@ -123,7 +168,9 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
 
 
     }
-
+    private static final String[] topics = new String[] {
+            "Belgium", "France", "Italy", "Germany", "Spain"
+    };
     public void connect(){
         Log.d(TAG, "In connect");
 
@@ -145,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         mqttport = port.getText().toString();
         mqttuser = user.getText().toString();
         mqttpass = pass.getText().toString();
+
         mqtttopic = tvtopic.getText().toString();
 
         MqttConnectOptions options = new MqttConnectOptions();
@@ -281,10 +329,24 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         tv.append(currTime + " : " + message.toString());
         tv.append(System.getProperty("line.separator"));
 
-        Toast.makeText(MainActivity.this, "Topic: " + topic + "\nMessage: " + message, Toast.LENGTH_LONG).show();
+       // Toast.makeText(MainActivity.this, "Topic: " + topic + "\nMessage: " + message, Toast.LENGTH_LONG).show();
         status.setText("Got a new message");
-
         sendnotification(topic, message.toString());
+
+        // Clear status textbox
+        CountDownTimer timer = new CountDownTimer(1000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+
+            @Override
+            public void onFinish() {
+                TextView status = (TextView) findViewById(R.id.status);
+                status.setText(""); //(or GONE)
+            }
+        }.start();
+
     }
 
     @Override
@@ -323,6 +385,17 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         TextView txtStatus = (TextView) findViewById(R.id.status);
         TextView txtMessages = (TextView) findViewById(R.id.messages);
         //System.out.println("btnClick");
+        TextView ip = (TextView) findViewById(R.id.mqttip);
+        TextView port = (TextView) findViewById(R.id.mqttport);
+        TextView user = (TextView) findViewById(R.id.mqttuser);
+        TextView pass = (TextView) findViewById(R.id.mqttpass);
+        TextInputLayout userwrapper = (TextInputLayout) findViewById(R.id.usernameWrapper);
+        TextInputLayout passwrapper = (TextInputLayout) findViewById(R.id.mqttpasswrapper);
+        CheckBox cbsound = (CheckBox) findViewById(R.id.chkSound);
+        CheckBox cbauto = (CheckBox) findViewById(R.id.chkAuto);
+        Button btnSC = (Button) findViewById(R.id.btnConnect);
+        AutoCompleteTextView txtTopic = (AutoCompleteTextView) findViewById(R.id.mqtt_topic);
+        TextView txtMess = (TextView) findViewById(R.id.messages);
 
         switch (view.getId()) {
             case R.id.btnClear:
@@ -331,10 +404,6 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 break;
             case R.id.btnConnect:
                 //Log.d(TAG, "Connect clicked");
-                TextView ip = (TextView) findViewById(R.id.mqttip);
-                TextView port = (TextView) findViewById(R.id.mqttport);
-                TextView user = (TextView) findViewById(R.id.mqttuser);
-                TextView pass = (TextView) findViewById(R.id.mqttpass);
                 TextView topic = (TextView) findViewById(R.id.mqtt_topic);
 
                 String sip = ip.getText().toString();
@@ -348,10 +417,59 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 editor.putString("port", sport);
                 editor.putString("user",suser);
                 editor.putString("pass",spass);
-                editor.putString("topic",stopic);
+/*
+                // Get previous topics
+                if (sharedpreferences.contains("topic")) {
+                    mqtttopic = sharedpreferences.getString("topic","");
+                    Log.d(TAG,mqtttopic);
+                    System.out.println(mqtttopic);
+                }
+*/
+
+                Set<String> outSet = sharedpreferences.getStringSet("topicSet", new HashSet<String>());
+                Set<String> workingSet = new HashSet<String>(outSet);
+                workingSet.add(stopic);
+                editor.putStringSet("topicSet", workingSet);
+
+                //editor.putString("topic",stopic);
                 editor.commit();
 
                 connect();
+                break;
+
+            case R.id.settings:
+                System.out.println(ip.getVisibility()); // 0 - visible, 4 - hidden
+                Log.d(TAG, Integer.toString(ip.getVisibility()));
+                int vis = ip.getVisibility();
+                if (vis == 0) {     // Already visible, hide
+                    ip.setVisibility(View.INVISIBLE);
+                    port.setVisibility(View.INVISIBLE);
+                    user.setVisibility(View.INVISIBLE);
+                    userwrapper.setVisibility(View.INVISIBLE);
+                    pass.setVisibility(View.INVISIBLE);
+                    passwrapper.setVisibility(View.INVISIBLE);
+                    cbauto.setVisibility(View.INVISIBLE);
+                    cbsound.setVisibility(View.INVISIBLE);
+                    btnSC.setVisibility(View.INVISIBLE);
+                    txtTopic.setVisibility(View.INVISIBLE);
+                    txtMessages.setVisibility(View.VISIBLE);
+                    txtStatus.setVisibility(View.VISIBLE);
+                }
+                else {
+                    txtMessages.setVisibility(View.INVISIBLE);
+                    ip.setVisibility(View.VISIBLE);
+                    port.setVisibility(View.VISIBLE);
+                    user.setVisibility(View.VISIBLE);
+                    userwrapper.setVisibility(View.VISIBLE);
+                    pass.setVisibility(View.VISIBLE);
+                    passwrapper.setVisibility(View.VISIBLE);
+                    cbauto.setVisibility(View.VISIBLE);
+                    cbsound.setVisibility(View.VISIBLE);
+                    btnSC.setVisibility(View.VISIBLE);
+                    txtTopic.setVisibility(View.VISIBLE);
+                    txtStatus.setVisibility(View.INVISIBLE);
+                }
+                break;
 
         }
     }
