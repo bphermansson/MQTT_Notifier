@@ -3,12 +3,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:padding="3dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:focusable="false"
     android:focusableInTouchMode="false">
 
+    <ImageButton
+        android:id="@+id/settings"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/iconsettings"
+        android:onClick="btnClick"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        />
+    <Button
+        android:id="@+id/btnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="btnClick"
+        android:text="Clear"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/settings"
+        />
 
     <TextView
             android:id="@+id/status"
@@ -36,17 +55,35 @@
             android:background="@android:color/darker_gray"
             android:padding="10dp" />
 -->
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/ipWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:paddingTop="20dp"
+        android:paddingLeft="20dp"
+        >
         <EditText
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:id="@+id/mqttip"
-            android:layout_below="@+id/chkAuto"
-            android:hint="Mqtt Ip"
+            android:hint="Mqttserver Ip"
             android:onClick="etClick"
             android:visibility="invisible"
             />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/portWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ipWrapper"
+        android:visibility="invisible"
+        android:paddingLeft="20dp"
+        android:paddingTop="11dp"
 
-        <EditText
+        >
+
+    <EditText
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:id="@+id/mqttport"
@@ -54,18 +91,22 @@
             android:hint="Mqtt port"
             android:visibility="invisible"
             />
+    </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/usernameWrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"
+        android:layout_below="@id/portWrapper"
+        android:paddingLeft="20dp"
+        android:paddingTop="5dp"
+
         >
         <EditText
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:id="@+id/mqttuser"
-            android:layout_below="@+id/mqttip"
             android:hint="Username"
             android:visibility="invisible"
             />
@@ -88,39 +129,79 @@
             app:passwordToggleEnabled="true"
             android:layout_below="@+id/usernameWrapper"
             android:visibility="invisible"
+            android:paddingLeft="20dp"
+            android:paddingTop="5dp"
+
             >
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/mqttpass"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:layout_below="@+id/mqttip"
                 android:inputType="textPassword"
+                android:hint="Password"
                 />
         </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/mqtttopicwrapper"
+        android:layout_width="150dp"
+        android:layout_height="38dp"
+        app:passwordToggleEnabled="true"
+        android:layout_below="@+id/mqttpasswrapper"
+        android:visibility="invisible"
+        android:paddingLeft="20dp"
+        android:paddingTop="5dp"
 
+        >
         <AutoCompleteTextView
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:id="@+id/mqtt_topic"
-            android:layout_below="@+id/mqttpasswrapper"
             android:hint="Topic"
             android:completionThreshold="1"
             android:visibility="invisible"
 
             />
+    </android.support.design.widget.TextInputLayout>
+    <Spinner
+        android:id="@+id/topic_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mqtttopicwrapper"
+        android:visibility="invisible"
+        android:paddingTop="5dp"
+        android:paddingLeft="20dp"
+        />
+        <CheckBox
+            android:id="@+id/chkSound"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:onClick="chkSoundClicked"
+            android:text="Silent"
+            android:layout_below="@id/topic_spinner"
+            android:visibility="invisible"
+            android:scaleX="1.20"
+            android:scaleY="1.20"
+            android:layout_marginLeft="20dp"
+            android:paddingTop="11dp"
 
-        <ImageButton
-            android:id="@+id/settings"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/iconsettings"
-            android:onClick="btnClick"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
             />
 
+
+        <CheckBox
+            android:id="@+id/chkAuto"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_below="@id/chkSound"
+            android:onClick="chkAutoClicked"
+            android:visibility="invisible"
+            android:text="Auto connect"
+            android:scaleX="1.20"
+            android:scaleY="1.20"
+            android:paddingTop="5dp"
+            android:layout_marginLeft="20dp"
+
+            />
     <Button
         android:id="@+id/btnConnect"
         android:layout_width="wrap_content"
@@ -132,46 +213,4 @@
         android:visibility="invisible"
 
         />
-
-    <Button
-        android:id="@+id/btnClear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="btnClick"
-        android:text="Clear"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@id/settings"
-        />
-
-
-        <CheckBox
-            android:id="@+id/chkSound"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:onClick="chkSoundClicked"
-            android:text="Silent"
-            android:layout_below="@id/mqtt_topic"
-            android:visibility="invisible"
-
-            />
-
-        />
-        <CheckBox
-            android:id="@+id/chkAuto"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_below="@id/chkSound"
-            android:onClick="chkAutoClicked"
-            android:visibility="invisible"
-            android:text="Auto connect" />
-
-<!--
-        <AutoCompleteTextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/testlist"
-            android:completionThreshold="1"
-            android:layout_below="@+id/btnConnect"
-            />
--->
     </RelativeLayout>

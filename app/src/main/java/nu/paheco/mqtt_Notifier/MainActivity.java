@@ -15,6 +15,9 @@ import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -22,6 +25,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         //TextView topic = (TextView) findViewById(R.id.mqtt_topic);
         TextView messages = (TextView) findViewById(R.id.messages);
         messages.setMovementMethod(new ScrollingMovementMethod());  // Activate scroll
+
+        Spinner spinner = (Spinner) findViewById(R.id.topic_spinner);
 
         // Get stored preferences
         sharedpreferences = getSharedPreferences("mypref",
@@ -150,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 android.R.layout.simple_list_item_1, oldtopics);
         topicView.setAdapter(adapterTopic);
 
+        // Spinner with ols topics
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, oldtopics);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
+        spinner.setAdapter(spinnerArrayAdapter);
+
         /*
         else {
             mqttpass="";
@@ -171,6 +182,29 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
     private static final String[] topics = new String[] {
             "Belgium", "France", "Italy", "Germany", "Spain"
     };
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        //respond to menu item selection
+        switch (item.getItemId()) {
+            case R.id.about:
+                //startActivity(new Intent(this, About.class));
+                return true;
+            case R.id.help:
+                //startActivity(new Intent(this, Help.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     public void connect(){
         Log.d(TAG, "In connect");
 
@@ -386,7 +420,9 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         TextView txtMessages = (TextView) findViewById(R.id.messages);
         //System.out.println("btnClick");
         TextView ip = (TextView) findViewById(R.id.mqttip);
+        TextInputLayout ipwrapper = (TextInputLayout) findViewById(R.id.ipWrapper);
         TextView port = (TextView) findViewById(R.id.mqttport);
+        TextInputLayout portwrapper = (TextInputLayout) findViewById(R.id.portWrapper);
         TextView user = (TextView) findViewById(R.id.mqttuser);
         TextView pass = (TextView) findViewById(R.id.mqttpass);
         TextInputLayout userwrapper = (TextInputLayout) findViewById(R.id.usernameWrapper);
@@ -395,7 +431,9 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         CheckBox cbauto = (CheckBox) findViewById(R.id.chkAuto);
         Button btnSC = (Button) findViewById(R.id.btnConnect);
         AutoCompleteTextView txtTopic = (AutoCompleteTextView) findViewById(R.id.mqtt_topic);
+        TextInputLayout topicwrapper = (TextInputLayout) findViewById(R.id.mqtttopicwrapper);
         TextView txtMess = (TextView) findViewById(R.id.messages);
+        Spinner topicsspinner = (Spinner) findViewById(R.id.topic_spinner);
 
         switch (view.getId()) {
             case R.id.btnClear:
@@ -444,6 +482,8 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 if (vis == 0) {     // Already visible, hide
                     ip.setVisibility(View.INVISIBLE);
                     port.setVisibility(View.INVISIBLE);
+                    ipwrapper.setVisibility(View.INVISIBLE);
+                    portwrapper.setVisibility(View.INVISIBLE);
                     user.setVisibility(View.INVISIBLE);
                     userwrapper.setVisibility(View.INVISIBLE);
                     pass.setVisibility(View.INVISIBLE);
@@ -454,11 +494,15 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                     txtTopic.setVisibility(View.INVISIBLE);
                     txtMessages.setVisibility(View.VISIBLE);
                     txtStatus.setVisibility(View.VISIBLE);
+                    topicsspinner.setVisibility(View.INVISIBLE);
+                    topicwrapper.setVisibility(View.INVISIBLE);
                 }
                 else {
                     txtMessages.setVisibility(View.INVISIBLE);
                     ip.setVisibility(View.VISIBLE);
                     port.setVisibility(View.VISIBLE);
+                    ipwrapper.setVisibility(View.VISIBLE);
+                    portwrapper.setVisibility(View.VISIBLE);
                     user.setVisibility(View.VISIBLE);
                     userwrapper.setVisibility(View.VISIBLE);
                     pass.setVisibility(View.VISIBLE);
@@ -468,6 +512,8 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                     btnSC.setVisibility(View.VISIBLE);
                     txtTopic.setVisibility(View.VISIBLE);
                     txtStatus.setVisibility(View.INVISIBLE);
+                    topicsspinner.setVisibility(View.VISIBLE);
+                    topicwrapper.setVisibility(View.VISIBLE);
                 }
                 break;
 
