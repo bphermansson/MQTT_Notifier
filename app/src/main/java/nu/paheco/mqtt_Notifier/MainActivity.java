@@ -2,6 +2,7 @@ package nu.paheco.mqtt_Notifier;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.media.RingtoneManager;
@@ -67,7 +68,12 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         TextView messages = (TextView) findViewById(R.id.messages);
         messages.setMovementMethod(new ScrollingMovementMethod());  // Activate scroll
 
-        Spinner spinner = (Spinner) findViewById(R.id.topic_spinner);
+        //Spinner spinner = (Spinner) findViewById(R.id.topic_spinner);
+
+        //String clientId = MqttClient.generateClientId();
+        //MqttAndroidClient client =
+        //        new MqttAndroidClient(this.getApplicationContext(), "192.168.1.1",
+        //                clientId);
 
         // Get stored preferences
         sharedpreferences = getSharedPreferences("mypref",
@@ -78,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         }
         else {
             mqttip="192.168.1.1";
-
         }
         if (sharedpreferences.contains("port")) {
             mqttport = sharedpreferences.getString("port","");
@@ -159,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         // Spinner with ols topics
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, oldtopics);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
-        spinner.setAdapter(spinnerArrayAdapter);
+        //spinner.setAdapter(spinnerArrayAdapter);
 
         /*
         else {
@@ -194,16 +199,28 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
 
         //respond to menu item selection
         switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, nu.paheco.mqtt_Notifier.settings.class));
+                break;
             case R.id.about:
                 //startActivity(new Intent(this, About.class));
                 return true;
             case R.id.help:
                 //startActivity(new Intent(this, Help.class));
                 return true;
+            case R.id.startservice:
+                // Start background service
+                startService(new Intent(this, MqttNotifier.class));
+                return true;
+            case R.id.stopservice:
+                stopService(new Intent(getBaseContext(), MqttNotifier.class));
+                return true;
             default:
-                return super.onOptionsItemSelected(item);
         }
-    }
+
+        return super.onOptionsItemSelected(item);
+        }
+
 
     public void connect(){
         Log.d(TAG, "In connect");
@@ -226,9 +243,16 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         mqttport = port.getText().toString();
         mqttuser = user.getText().toString();
         mqttpass = pass.getText().toString();
-
         mqtttopic = tvtopic.getText().toString();
 
+        //System.out.println(mqttuser.length());
+        boolean err=false;
+        if(mqttport.length()==0||mqttuser.length()==0||mqttpass.length()==0||mqtttopic.length()==0) {
+            err=true;
+            System.out.println("err: " + err);
+
+            return;
+        }
         MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         options.setUserName(mqttuser);
@@ -237,15 +261,28 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
 
         Log.d(TAG,address);
         Log.d(TAG,user+"-"+pass+"-"+mqtttopic);
+        System.out.println("In connect: " + mqtttopic);
 
         String clientId = MqttClient.generateClientId();
         final MqttAndroidClient client =
                 new MqttAndroidClient(this.getApplicationContext(), address,
                         clientId);
+        try {
+            if (client.isConnected()) {
+                //                 client.unsubscribe(topic);
+                client.disconnect();
+                System.out.println("Disconnect");
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
 
         try {
             Log.d(TAG,"Connect");
+            System.out.println("Connect");
+
             IMqttToken token = client.connect(options);
+
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
@@ -256,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
 
                     int qos = 1;
                     try {
+                        System.out.println(mqtttopic);
                         IMqttToken subToken = client.subscribe(mqtttopic, qos);
                         subToken.setActionCallback(new IMqttActionListener() {
                             @Override
@@ -299,7 +337,20 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
             e.printStackTrace();
         }
     }
-
+/*
+    public void disconnect() {
+        if (null != client && client.isConnected()) {
+            try {
+                client.unsubscribe(topic);
+                client.disconnect();
+                client.unregisterResources();
+                client = null;
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+*/
     public void sendnotification(String title, String text) {
         // https://www.tutorialspoint.com/android/android_notifications.htm
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
@@ -358,9 +409,9 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         String currTime = sdf.format(new Date());
 
-        Log.d(appname, currTime + " : " + message.toString());
+        //Log.d(appname, currTime + " : " + message.toString());
 
-        tv.append(currTime + " : " + message.toString());
+        tv.append(currTime + " : " + topic + " : " + message.toString());
         tv.append(System.getProperty("line.separator"));
 
        // Toast.makeText(MainActivity.this, "Topic: " + topic + "\nMessage: " + message, Toast.LENGTH_LONG).show();
@@ -382,6 +433,8 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         }.start();
 
     }
+
+
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
@@ -433,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
         AutoCompleteTextView txtTopic = (AutoCompleteTextView) findViewById(R.id.mqtt_topic);
         TextInputLayout topicwrapper = (TextInputLayout) findViewById(R.id.mqtttopicwrapper);
         TextView txtMess = (TextView) findViewById(R.id.messages);
-        Spinner topicsspinner = (Spinner) findViewById(R.id.topic_spinner);
+        //Spinner topicsspinner = (Spinner) findViewById(R.id.topic_spinner);
 
         switch (view.getId()) {
             case R.id.btnClear:
@@ -442,19 +495,19 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 break;
             case R.id.btnConnect:
                 //Log.d(TAG, "Connect clicked");
-                TextView topic = (TextView) findViewById(R.id.mqtt_topic);
 
                 String sip = ip.getText().toString();
                 String sport = port.getText().toString();
                 String suser = user.getText().toString();
                 String spass = pass.getText().toString();
-                String stopic = topic.getText().toString();
+                String stopic = txtTopic.getText().toString();
 
                 SharedPreferences.Editor editor = sharedpreferences.edit();
                 editor.putString("ip", sip);
                 editor.putString("port", sport);
                 editor.putString("user",suser);
                 editor.putString("pass",spass);
+
 /*
                 // Get previous topics
                 if (sharedpreferences.contains("topic")) {
@@ -470,8 +523,8 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                 editor.putStringSet("topicSet", workingSet);
 
                 //editor.putString("topic",stopic);
-                editor.commit();
-
+                editor.apply();
+// TODO Close settings
                 connect();
                 break;
 
@@ -494,8 +547,10 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                     txtTopic.setVisibility(View.INVISIBLE);
                     txtMessages.setVisibility(View.VISIBLE);
                     txtStatus.setVisibility(View.VISIBLE);
-                    topicsspinner.setVisibility(View.INVISIBLE);
+                    //topicsspinner.setVisibility(View.INVISIBLE);
                     topicwrapper.setVisibility(View.INVISIBLE);
+                    // Reconnect
+                    connect();
                 }
                 else {
                     txtMessages.setVisibility(View.INVISIBLE);
@@ -512,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements MqttCallback {
                     btnSC.setVisibility(View.VISIBLE);
                     txtTopic.setVisibility(View.VISIBLE);
                     txtStatus.setVisibility(View.INVISIBLE);
-                    topicsspinner.setVisibility(View.VISIBLE);
+                    //topicsspinner.setVisibility(View.VISIBLE);
                     topicwrapper.setVisibility(View.VISIBLE);
                 }
                 break;

@@ -7,4 +7,8 @@
         android:title="About" />
     <item android:id="@+id/help"
         android:title="Help" />
+    <item android:id="@+id/startservice"
+        android:title="Start Service" />
+    <item android:id="@+id/stopservice"
+        android:title="Stop Service" />
 </menu>

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:id="@+id/MainForm"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -125,7 +129,7 @@
         <android.support.design.widget.TextInputLayout
             android:id="@+id/mqttpasswrapper"
             android:layout_width="150dp"
-            android:layout_height="38dp"
+            android:layout_height="55dp"
             app:passwordToggleEnabled="true"
             android:layout_below="@+id/usernameWrapper"
             android:visibility="invisible"
@@ -137,7 +141,7 @@
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/mqttpass"
                 android:layout_width="match_parent"
-                android:layout_height="35dp"
+                android:layout_height="55dp"
                 android:inputType="textPassword"
                 android:hint="Password"
                 />
@@ -145,7 +149,7 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/mqtttopicwrapper"
         android:layout_width="150dp"
-        android:layout_height="38dp"
+        android:layout_height="55dp"
         app:passwordToggleEnabled="true"
         android:layout_below="@+id/mqttpasswrapper"
         android:visibility="invisible"
@@ -155,14 +159,16 @@
         >
         <AutoCompleteTextView
             android:layout_width="150dp"
-            android:layout_height="40dp"
+            android:layout_height="55dp"
             android:id="@+id/mqtt_topic"
             android:hint="Topic"
             android:completionThreshold="1"
             android:visibility="invisible"
+            android:drawableRight="@drawable/unfold"
 
-            />
+        />
     </android.support.design.widget.TextInputLayout>
+    <!--
     <Spinner
         android:id="@+id/topic_spinner"
         android:layout_width="fill_parent"
@@ -172,13 +178,14 @@
         android:paddingTop="5dp"
         android:paddingLeft="20dp"
         />
+     -->
         <CheckBox
             android:id="@+id/chkSound"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:onClick="chkSoundClicked"
             android:text="Silent"
-            android:layout_below="@id/topic_spinner"
+            android:layout_below="@id/mqtttopicwrapper"
             android:visibility="invisible"
             android:scaleX="1.20"
             android:scaleY="1.20"
@@ -199,7 +206,6 @@
             android:scaleX="1.20"
             android:scaleY="1.20"
             android:paddingTop="5dp"
-            android:layout_marginLeft="20dp"
 
             />
     <Button
@@ -209,8 +215,9 @@
         android:onClick="btnClick"
         android:clickable="true"
         android:text="Save/Connect"
-        android:layout_alignParentBottom="true"
         android:visibility="invisible"
+        android:layout_below="@id/chkAuto"
 
         />
     </RelativeLayout>
+</ScrollView>
